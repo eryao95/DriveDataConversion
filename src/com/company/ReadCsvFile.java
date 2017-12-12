@@ -87,22 +87,33 @@ public class ReadCsvFile {
             delay = ((endHour * 3600) + (endMinute * 60) + endSecond) -
                     ((startHour * 3600) + (startMinute * 60) + startSecond);
             if(delay >= 90) {
-                outputData[2] = entries.get(startIndex).getLatitude();
-                outputData[3] = entries.get(startIndex).getLongitude();
-                outputData[4] = entries.get(startIndex).getLinkID();
-                outputData[5] = entries.get(startIndex).getTime();
-                outputData[6] = "0";
-                outputData[9] = entries.get(endIndex).getLatitude();
-                outputData[10] = entries.get(endIndex).getLongitude();
-                outputData[11] = entries.get(endIndex).getLinkID();
-                outputData[12] = entries.get(endIndex).getTime();
-                outputData[13] = String.valueOf(delay);
+                String startID = entries.get(startIndex).getLinkID();
+                String endID = entries.get(endIndex).getLinkID();
 
-                try {
-                    WriteCsvFile output = new WriteCsvFile();
-                    output.writeCsvFile(outputData);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(startID.equals("-10")) {
+                    startID = mapLinkID(startID, startIndex);
+                }
+                if(endID.equals("-10")) {
+                    endID = mapLinkID(endID, endIndex);
+                }
+                if(!startID.equals(endID)) {
+                    outputData[2] = entries.get(startIndex).getLatitude();
+                    outputData[3] = entries.get(startIndex).getLongitude();
+                    outputData[4] = startID;
+                    outputData[5] = entries.get(startIndex).getTime();
+                    outputData[6] = "0";
+                    outputData[9] = entries.get(endIndex).getLatitude();
+                    outputData[10] = entries.get(endIndex).getLongitude();
+                    outputData[11] = endID;
+                    outputData[12] = entries.get(endIndex).getTime();
+                    outputData[13] = String.valueOf(delay);
+
+                    try {
+                        WriteCsvFile output = new WriteCsvFile();
+                        output.writeCsvFile(outputData);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -113,6 +124,40 @@ public class ReadCsvFile {
                 startIndex = endIndex + 1;
             }
         }
+    }
+
+    private String mapLinkID(String ID, int index) {
+        int forwardCount, backCount;
+        String forwardID, backID;
+
+        String nearestID;
+
+        forwardCount = 0;
+        backCount = 0;
+
+        for(int i= index + 1; i< index + 9; i++) {
+            forwardID = entries.get(i).getLinkID();
+            forwardCount++;
+            if(!forwardID.equals("-10")) {
+                break;
+            }
+        }
+
+        for(int j = index - 1 ; j > index - 9; j--) {
+            backID = entries.get(j).getLinkID();
+            backCount++;
+            if(!backID.equals("-10")) {
+                break;
+            }
+        }
+
+        if(forwardCount <= backCount) {
+            nearestID = entries.get(index + forwardCount).getLinkID();
+        }
+        else {
+            nearestID = entries.get(index - backCount).getLinkID();
+        }
+        return nearestID;
     }
 }
 

@@ -75,6 +75,10 @@ public class Entry {
         return linkID;
     }
 
+    public void setLinkID(String newLinkID) {
+        this.linkID = newLinkID;
+    }
+
     public String getEast() {
         return east;
     }
