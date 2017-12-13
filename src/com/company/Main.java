@@ -20,7 +20,6 @@ public class Main {
         for(int i = 0; i < listOfFiles.length; i++) {
             File file = listOfFiles[i];
             fileName = file.getName();
-            System.out.println(listOfFiles[i]);
             parts = fileName.split(".txt");
             String routeID = parts[0];
 
