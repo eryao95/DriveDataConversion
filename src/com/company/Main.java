@@ -2,9 +2,7 @@ package com.company;
 
 import com.csvreader.CsvReader;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 
 public class Main {
 
@@ -13,26 +11,32 @@ public class Main {
         String parts[] = new String[3];
         String fileName;
 
-        File f = new File("00rihyl67gpsd711xiaa1r76.txt.csv");
-        fileName = f.getName();
-
-        parts = fileName.split(".txt");
-        String routeID = parts[0];
+        File folder = new File("Files");
+        File [] listOfFiles = folder.listFiles();
 
         outputData[0] = "START";
-        outputData[1] = routeID;
         outputData[7] = "END";
-        outputData[8] = routeID;
 
-        try{
-            CsvReader file = new CsvReader(fileName);
-            ReadCsvFile input = new ReadCsvFile();
-            input.readCsvFile(file);
-            input.calculateDelay(outputData);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        for(int i = 0; i < listOfFiles.length; i++) {
+            File file = listOfFiles[i];
+            fileName = file.getName();
+            System.out.println(listOfFiles[i]);
+            parts = fileName.split(".txt");
+            String routeID = parts[0];
+
+            outputData[1] = routeID;
+            outputData[8] = routeID;
+
+            try{
+                CsvReader fileToRead = new CsvReader("C:\\Users\\Bo Yang\\Desktop\\DriveDataConversion\\Files\\" + fileName);
+                ReadCsvFile input = new ReadCsvFile();
+                input.readCsvFile(fileToRead);
+                input.calculateDelay(outputData);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

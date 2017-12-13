@@ -37,22 +37,6 @@ public class ReadCsvFile {
         if(size > 90) {
             checkSpeedRequirements(outputData, size);
         }
-        else {
-            outputData[0] = "-";
-            outputData[1] = null;
-            outputData[2] = "-";
-            outputData[3] = "-";
-            outputData[4] = "-";
-            outputData[5] = "-";
-            outputData[6] = "-";
-            outputData[7] = "-";
-            outputData[8] = null;
-            outputData[9] = "-";
-            outputData[10] = "-";
-            outputData[11] = "-";
-            outputData[12] = "-";
-            outputData[13] = "0";
-        }
     }
 
     private void checkSpeedRequirements(String [] outputData, int size) {
