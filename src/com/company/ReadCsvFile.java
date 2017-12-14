@@ -28,7 +28,7 @@ public class ReadCsvFile {
         }
     }
 
-    /*condition for congestion: speed < 5km/h for more than 90s.
+    /*condition for traffic light: speed < 5km/h for more than 90s and LinkID changes.
      *If size of data is less than 90, means no congestion at all.
      */
     public void calculateDelay(String [] outputData) {
