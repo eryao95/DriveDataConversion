@@ -31,7 +31,7 @@ public class ReadCsvFile {
     /*condition for traffic light: speed < 5km/h for more than 90s and LinkID changes.
      *If size of data is less than 90, means no congestion at all.
      */
-    public void calculateDelay(String [] outputData) {
+    public void checkForTrafficLights(String [] outputData) {
         size = entries.size();
 
         if(size > 90) {
@@ -40,8 +40,8 @@ public class ReadCsvFile {
     }
 
     private void checkSpeedRequirements(String [] outputData, int size) {
-        int startIndex, endIndex, speed, startHour, endHour, startMinute, endMinute;
-        float delay, startSecond, endSecond, startTime, endTime;
+        int startIndex, endIndex, speed;
+        float delay, startTime, endTime;
 
         startIndex = 0;
         speed = 0;
@@ -61,15 +61,8 @@ public class ReadCsvFile {
             startTime = entries.get(startIndex).getIntTime();
             endTime = entries.get(endIndex).getIntTime();
 
-            startSecond = startTime % 100;
-            startMinute = (int) (startTime / 100) % 100;
-            startHour = (int) (startTime /10000) % 100;
-            endSecond = endTime % 100;
-            endMinute = (int) (endTime / 100) % 100;
-            endHour = (int) (endTime /10000) % 100;
+            delay = calculateDelay(startTime, endTime);
 
-            delay = ((endHour * 3600) + (endMinute * 60) + endSecond) -
-                    ((startHour * 3600) + (startMinute * 60) + startSecond);
             if(delay >= 90) {
                 String startID = entries.get(startIndex).getLinkID();
                 String endID = entries.get(endIndex).getLinkID();
@@ -108,6 +101,21 @@ public class ReadCsvFile {
                 startIndex = endIndex + 1;
             }
         }
+    }
+
+    private float calculateDelay(float startTime, float endTime) {
+        float delay, startSecond, endSecond, startHour, endHour, startMinute, endMinute;
+
+        startSecond = startTime % 100;
+        startMinute = (int) (startTime / 100) % 100;
+        startHour = (int) (startTime /10000) % 100;
+        endSecond = endTime % 100;
+        endMinute = (int) (endTime / 100) % 100;
+        endHour = (int) (endTime /10000) % 100;
+
+        delay = ((endHour * 3600) + (endMinute * 60) + endSecond) -
+                ((startHour * 3600) + (startMinute * 60) + startSecond);
+        return delay;
     }
 
     private String mapLinkID(String ID, int index) {

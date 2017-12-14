@@ -30,7 +30,7 @@ public class Main {
                 CsvReader fileToRead = new CsvReader("C:\\Users\\Bo Yang\\Desktop\\DriveDataConversion\\Files\\" + fileName);
                 ReadCsvFile input = new ReadCsvFile();
                 input.readCsvFile(fileToRead);
-                input.calculateDelay(outputData);
+                input.checkForTrafficLights(outputData);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
