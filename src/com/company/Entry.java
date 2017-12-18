@@ -55,7 +55,7 @@ public class Entry {
         return String.valueOf(decimalDegrees);
     }
 
-    public float getIntTime() {
+    public float getFloatTime() {
         return Float.parseFloat(time);
     }
 

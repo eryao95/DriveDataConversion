@@ -14,6 +14,7 @@ public class ReadCsvFile {
         size = 0;
     }
 
+    //using CsvReader to read the csv file and create a new entry with each record
     public void readCsvFile(CsvReader file) throws IOException {
 
         try {
@@ -58,8 +59,8 @@ public class ReadCsvFile {
                 }
             }
 
-            startTime = entries.get(startIndex).getIntTime();
-            endTime = entries.get(endIndex).getIntTime();
+            startTime = entries.get(startIndex).getFloatTime();
+            endTime = entries.get(endIndex).getFloatTime();
 
             delay = calculateDelay(startTime, endTime);
 
@@ -68,10 +69,10 @@ public class ReadCsvFile {
                 String endID = entries.get(endIndex).getLinkID();
 
                 if(startID.equals("-10")) {
-                    startID = mapLinkID(startID, startIndex);
+                    startID = mapLinkID(startIndex);
                 }
                 if(endID.equals("-10")) {
-                    endID = mapLinkID(endID, endIndex);
+                    endID = mapLinkID(endIndex);
                 }
                 if(!startID.equals(endID)) {
                     outputData[2] = entries.get(startIndex).getLatitude();
@@ -103,6 +104,7 @@ public class ReadCsvFile {
         }
     }
 
+    //calculate time taken between 2 points in seconds
     private float calculateDelay(float startTime, float endTime) {
         float delay, startSecond, endSecond, startHour, endHour, startMinute, endMinute;
 
@@ -118,38 +120,63 @@ public class ReadCsvFile {
         return delay;
     }
 
-    private String mapLinkID(String ID, int index) {
-        int forwardCount, backCount;
-        String forwardID, backID;
 
-        String nearestID;
+    // missing LinkIDs to the closest linkID
+    private String mapLinkID(int index) {
+        int forwardCount, backCount;
+        String forwardID = "", backID = "", nearestID;
+
+        String correctID = "";
 
         forwardCount = 0;
         backCount = 0;
 
-        for(int i= index + 1; i< index + 9; i++) {
-            forwardID = entries.get(i).getLinkID();
-            forwardCount++;
-            if(!forwardID.equals("-10")) {
-                break;
+        //if the previous linkID is the same as the linkID after the missing point, missing point will be the same
+        for(int i = index; i>0; i--) {
+            if(!(entries.get(i).getLinkID().equals("-10"))) {
+                backID = entries.get(i).getLinkID();
             }
         }
 
-        for(int j = index - 1 ; j > index - 9; j--) {
-            backID = entries.get(j).getLinkID();
-            backCount++;
-            if(!backID.equals("-10")) {
-                break;
+        for(int j = index; j<entries.size(); j++) {
+            if(!(entries.get(j).getLinkID().equals("-10"))) {
+                forwardID = entries.get(j).getLinkID();
             }
         }
 
-        if(forwardCount <= backCount) {
-            nearestID = entries.get(index + forwardCount).getLinkID();
+        if(backID.equals(forwardID)) {
+            correctID = backID;
         }
         else {
-            nearestID = entries.get(index - backCount).getLinkID();
+            //if previous linkID != to next linkID, map to closest 10s
+            for(int i= index + 1; i< index + 9; i++) {
+                forwardID = entries.get(i).getLinkID();
+                forwardCount++;
+                if(!forwardID.equals("-10")) {
+                    break;
+                }
+            }
+
+            for(int j = index - 1 ; j > index - 9; j--) {
+                backID = entries.get(j).getLinkID();
+                backCount++;
+                if(!backID.equals("-10")) {
+                    break;
+                }
+            }
+
+            if(forwardCount <= backCount) {
+                nearestID = entries.get(index + forwardCount).getLinkID();
+            }
+            else {
+                nearestID = entries.get(index - backCount).getLinkID();
+            }
+
+            correctID = nearestID;
         }
-        return nearestID;
+
+        entries.get(index).setLinkID(correctID);
+        return correctID;
     }
 }
 
