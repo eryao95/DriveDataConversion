@@ -43,6 +43,7 @@ public class ReadCsvFile {
     private void checkSpeedRequirements(String [] outputData, int size) {
         int startIndex, endIndex, speed;
         float delay, startTime, endTime;
+        boolean trafficLight;
 
         startIndex = 0;
         speed = 0;
@@ -75,6 +76,13 @@ public class ReadCsvFile {
                     endID = mapLinkID(endIndex);
                 }
                 if(!startID.equals(endID)) {
+                    trafficLight = true;
+                }
+                else {
+                    trafficLight = checkForNextTenSeconds(endIndex);
+                }
+
+                if(trafficLight) {
                     outputData[2] = entries.get(startIndex).getLatitude();
                     outputData[3] = entries.get(startIndex).getLongitude();
                     outputData[4] = startID;
@@ -104,6 +112,19 @@ public class ReadCsvFile {
         }
     }
 
+    //check for next 10s to see if the vehicle changes a linkID
+    private boolean checkForNextTenSeconds(int endIndex) {
+
+        for(int i = endIndex; i<10; i++) {
+            if(!entries.get(i).getLinkID().equals(entries.get(endIndex).getLinkID())) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
     //calculate time taken between 2 points in seconds
     private float calculateDelay(float startTime, float endTime) {
         float delay, startSecond, endSecond, startHour, endHour, startMinute, endMinute;
@@ -126,7 +147,7 @@ public class ReadCsvFile {
         int forwardCount, backCount;
         String forwardID = "", backID = "", nearestID;
 
-        String correctID = "";
+        String correctID;
 
         forwardCount = 0;
         backCount = 0;
