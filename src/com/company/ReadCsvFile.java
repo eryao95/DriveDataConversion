@@ -169,8 +169,8 @@ public class ReadCsvFile {
             correctID = backID;
         }
         else {
-            //if previous linkID != to next linkID, map to closest 10s
-            for(int i= index + 1; i< index + 9; i++) {
+            //if previous linkID != to next linkID, map to closest
+            for(int i= index + 1; i< index; i++) {
                 forwardID = entries.get(i).getLinkID();
                 forwardCount++;
                 if(!forwardID.equals("-10")) {
@@ -178,7 +178,7 @@ public class ReadCsvFile {
                 }
             }
 
-            for(int j = index - 1 ; j > index - 9; j--) {
+            for(int j = index - 1; j > index; j--) {
                 backID = entries.get(j).getLinkID();
                 backCount++;
                 if(!backID.equals("-10")) {
@@ -200,4 +200,3 @@ public class ReadCsvFile {
         return correctID;
     }
 }
-
