@@ -9,6 +9,8 @@ import java.util.ArrayList;
 public class ReadCsvFile {
     private ArrayList<Entry> entries = new ArrayList<>();
     private int size;
+    private int timeForDelay = 90;
+    private String missingID = "-10";
 
     public ReadCsvFile() {
         size = 0;
@@ -35,7 +37,7 @@ public class ReadCsvFile {
     public void checkForTrafficLights(String [] outputData) {
         size = entries.size();
 
-        if(size > 90) {
+        if(size > timeForDelay) {
             checkSpeedRequirements(outputData, size);
         }
     }
@@ -44,14 +46,15 @@ public class ReadCsvFile {
         int startIndex, endIndex, speed;
         float delay, startTime, endTime;
         boolean trafficLight;
+        int speedForDelay = 5;
 
         startIndex = 0;
         speed = 0;
         endIndex = 1;
-        while(startIndex + 90 < size) {
+        while(startIndex + timeForDelay < size) {
             for (int i = startIndex; i < size; i++) {
                 speed = entries.get(i).getSpeed();
-                if (speed > 5 && i != 0) {
+                if (speed > speedForDelay && i != 0) {
                     endIndex = i - 1;
                     break;
                 }
@@ -65,24 +68,19 @@ public class ReadCsvFile {
 
             delay = calculateDelay(startTime, endTime);
 
-            if(delay >= 90) {
+            if(delay >= timeForDelay) {
                 String startID = entries.get(startIndex).getLinkID();
                 String endID = entries.get(endIndex).getLinkID();
 
-                if(startID.equals("-10")) {
+                if (startID.equals(missingID)) {
                     startID = mapLinkID(startIndex);
                 }
-                if(endID.equals("-10")) {
+                if (endID.equals(missingID)) {
                     endID = mapLinkID(endIndex);
                 }
-                if(!startID.equals(endID)) {
-                    trafficLight = true;
-                }
-                else {
-                    trafficLight = checkForNextTenSeconds(endIndex);
-                }
+                trafficLight = !startID.equals(endID) || checkForNextTenSeconds(endIndex);
 
-                if(trafficLight) {
+                if (trafficLight) {
                     outputData[2] = entries.get(startIndex).getLatitude();
                     outputData[3] = entries.get(startIndex).getLongitude();
                     outputData[4] = startID;
@@ -103,7 +101,7 @@ public class ReadCsvFile {
                 }
             }
 
-            if(speed > 5) {
+            if(speed > speedForDelay) {
                 startIndex = endIndex + 2;
             }
             else {
@@ -112,7 +110,7 @@ public class ReadCsvFile {
         }
     }
 
-    //check for next 10s to see if the vehicle changes a linkID
+    //check for next 10s to see if the vehicle changes linkID
     private boolean checkForNextTenSeconds(int endIndex) {
 
         for(int i = endIndex; i<10; i++) {
@@ -131,7 +129,7 @@ public class ReadCsvFile {
 
         startSecond = startTime % 100;
         startMinute = (int) (startTime / 100) % 100;
-        startHour = (int) (startTime /10000) % 100;
+        startHour = (int) (startTime / 10000) % 100;
         endSecond = endTime % 100;
         endMinute = (int) (endTime / 100) % 100;
         endHour = (int) (endTime /10000) % 100;
@@ -154,13 +152,13 @@ public class ReadCsvFile {
 
         //if the previous linkID is the same as the linkID after the missing point, missing point will be the same
         for(int i = index; i>0; i--) {
-            if(!(entries.get(i).getLinkID().equals("-10"))) {
+            if(!(entries.get(i).getLinkID().equals(missingID))) {
                 backID = entries.get(i).getLinkID();
             }
         }
 
         for(int j = index; j<entries.size(); j++) {
-            if(!(entries.get(j).getLinkID().equals("-10"))) {
+            if(!(entries.get(j).getLinkID().equals(missingID))) {
                 forwardID = entries.get(j).getLinkID();
             }
         }
@@ -173,7 +171,7 @@ public class ReadCsvFile {
             for(int i= index + 1; i< index; i++) {
                 forwardID = entries.get(i).getLinkID();
                 forwardCount++;
-                if(!forwardID.equals("-10")) {
+                if(!forwardID.equals(missingID)) {
                     break;
                 }
             }
@@ -181,7 +179,7 @@ public class ReadCsvFile {
             for(int j = index - 1; j > index; j--) {
                 backID = entries.get(j).getLinkID();
                 backCount++;
-                if(!backID.equals("-10")) {
+                if(!backID.equals(missingID)) {
                     break;
                 }
             }
