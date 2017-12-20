@@ -150,7 +150,7 @@ public class ReadCsvFile {
     //check for next 10s to see if the vehicle changes linkID
     private boolean checkForNextNSeconds(int endIndex) {
 
-        for(int i = endIndex; i<BUFFER_FOR_LINKCHANGE; i++) {
+        for(int i = endIndex; i<BUFFER_FOR_LINK_CHANGE; i++) {
             if(!entries.get(i).getLinkID().equals(entries.get(endIndex).getLinkID())) {
                 return true;
             }
