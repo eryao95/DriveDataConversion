@@ -7,15 +7,13 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) {
-        String outputData[] = new String[14];
+        String outputData[] = new String[15];
         String parts[] = new String[3];
         String fileName;
 
         File folder = new File("Files");
         File [] listOfFiles = folder.listFiles();
 
-        outputData[0] = "START";
-        outputData[7] = "END";
 
         for(int i = 0; i < listOfFiles.length; i++) {
             File file = listOfFiles[i];

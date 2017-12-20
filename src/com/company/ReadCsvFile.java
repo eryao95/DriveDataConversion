@@ -6,10 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static com.company.Config.*;
+
 public class ReadCsvFile {
     private ArrayList<Entry> entries = new ArrayList<>();
     private int size;
-    private int timeForDelay = 90;
     private String missingID = "-10";
 
     public ReadCsvFile() {
@@ -37,7 +38,7 @@ public class ReadCsvFile {
     public void checkForTrafficLights(String [] outputData) {
         size = entries.size();
 
-        if(size > timeForDelay) {
+        if(size > TIME_FOR_DELAY) {
             checkSpeedRequirements(outputData, size);
         }
     }
@@ -45,16 +46,16 @@ public class ReadCsvFile {
     private void checkSpeedRequirements(String [] outputData, int size) {
         int startIndex, endIndex, speed;
         float delay, startTime, endTime;
+        String startID, endID;
         boolean trafficLight;
-        int speedForDelay = 5;
 
         startIndex = 0;
         speed = 0;
         endIndex = 1;
-        while(startIndex + timeForDelay < size) {
+        while(startIndex + TIME_FOR_DELAY < size) {
             for (int i = startIndex; i < size; i++) {
                 speed = entries.get(i).getSpeed();
-                if (speed > speedForDelay && i != 0) {
+                if (speed > SPEED_FOR_DELAY && i != 0) {
                     endIndex = i - 1;
                     break;
                 }
@@ -68,40 +69,76 @@ public class ReadCsvFile {
 
             delay = calculateDelay(startTime, endTime);
 
-            if(delay >= timeForDelay) {
-                String startID = entries.get(startIndex).getLinkID();
-                String endID = entries.get(endIndex).getLinkID();
+            startID = entries.get(startIndex).getLinkID();
+            endID = entries.get(endIndex).getLinkID();
 
-                if (startID.equals(missingID)) {
-                    startID = mapLinkID(startIndex);
-                }
-                if (endID.equals(missingID)) {
-                    endID = mapLinkID(endIndex);
-                }
-                trafficLight = !startID.equals(endID) || checkForNextTenSeconds(endIndex);
-
-                if (trafficLight) {
-                    outputData[2] = entries.get(startIndex).getLatitude();
-                    outputData[3] = entries.get(startIndex).getLongitude();
-                    outputData[4] = startID;
-                    outputData[5] = entries.get(startIndex).getTime();
-                    outputData[6] = "0";
-                    outputData[9] = entries.get(endIndex).getLatitude();
-                    outputData[10] = entries.get(endIndex).getLongitude();
-                    outputData[11] = endID;
-                    outputData[12] = entries.get(endIndex).getTime();
-                    outputData[13] = String.valueOf(delay);
-
-                    try {
-                        WriteCsvFile output = new WriteCsvFile();
-                        output.writeCsvFile(outputData);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+            if (startID.equals(missingID)) {
+                startID = mapLinkID(startIndex);
+            }
+            if (endID.equals(missingID)) {
+                endID = mapLinkID(endIndex);
             }
 
-            if(speed > speedForDelay) {
+            if(delay > TIME_FOR_DELAY) {
+                outputData[0] = "CONGESTION";
+                outputData[2] = entries.get(startIndex).getLatitude();
+                outputData[3] = entries.get(startIndex).getLongitude();
+                outputData[4] = startID;
+                outputData[5] = entries.get(startIndex).getTime();
+                outputData[6] = "0";
+                outputData[7] = "END";
+                outputData[9] = entries.get(endIndex).getLatitude();
+                outputData[10] = entries.get(endIndex).getLongitude();
+                outputData[11] = endID;
+                outputData[12] = entries.get(endIndex).getTime();
+                outputData[13] = String.valueOf(delay);
+                outputData[14] = CONGESTION;
+
+                try {
+                    WriteCsvFile output = new WriteCsvFile();
+                    output.writeCsvFile(outputData);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            else if (delay > 5 && delay <= TIME_FOR_DELAY){
+                trafficLight = checkForNextNSeconds(endIndex);
+
+                if (startID.equals(endID)) {
+                    if(trafficLight) {
+                        outputData[14] = RULE_TWO;
+                    }
+                    else {
+                        outputData[14] = RULE_ONE;
+                    }
+                }
+                else {
+                    outputData[14] = RULE_THREE;
+                }
+                outputData[0] = "TRAFFIC LIGHT";
+                outputData[2] = entries.get(startIndex).getLatitude();
+                outputData[3] = entries.get(startIndex).getLongitude();
+                outputData[4] = startID;
+                outputData[5] = entries.get(startIndex).getTime();
+                outputData[6] = "0";
+                outputData[7] = "end";
+                outputData[9] = entries.get(endIndex).getLatitude();
+                outputData[10] = entries.get(endIndex).getLongitude();
+                outputData[11] = endID;
+                outputData[12] = entries.get(endIndex).getTime();
+                outputData[13] = String.valueOf(delay);
+
+                try {
+                    WriteCsvFile output = new WriteCsvFile();
+                    output.writeCsvFile(outputData);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            if(speed > SPEED_FOR_DELAY) {
                 startIndex = endIndex + 2;
             }
             else {
@@ -111,9 +148,9 @@ public class ReadCsvFile {
     }
 
     //check for next 10s to see if the vehicle changes linkID
-    private boolean checkForNextTenSeconds(int endIndex) {
+    private boolean checkForNextNSeconds(int endIndex) {
 
-        for(int i = endIndex; i<10; i++) {
+        for(int i = endIndex; i<BUFFER_FOR_LINKCHANGE; i++) {
             if(!entries.get(i).getLinkID().equals(entries.get(endIndex).getLinkID())) {
                 return true;
             }
@@ -154,21 +191,23 @@ public class ReadCsvFile {
         for(int i = index; i>0; i--) {
             if(!(entries.get(i).getLinkID().equals(missingID))) {
                 backID = entries.get(i).getLinkID();
+                break;
             }
         }
 
         for(int j = index; j<entries.size(); j++) {
             if(!(entries.get(j).getLinkID().equals(missingID))) {
                 forwardID = entries.get(j).getLinkID();
+                break;
             }
         }
 
-        if(backID.equals(forwardID)) {
+        if(backID.equals(forwardID) && !backID.equals("")) {
             correctID = backID;
         }
         else {
             //if previous linkID != to next linkID, map to closest
-            for(int i= index + 1; i< index; i++) {
+            for(int i= index + 1; i < entries.size(); i++) {
                 forwardID = entries.get(i).getLinkID();
                 forwardCount++;
                 if(!forwardID.equals(missingID)) {
@@ -176,7 +215,7 @@ public class ReadCsvFile {
                 }
             }
 
-            for(int j = index - 1; j > index; j--) {
+            for(int j = index - 1; j > 0; j--) {
                 backID = entries.get(j).getLinkID();
                 backCount++;
                 if(!backID.equals(missingID)) {
@@ -184,7 +223,13 @@ public class ReadCsvFile {
                 }
             }
 
-            if(forwardCount <= backCount) {
+            if(forwardCount == 0) {
+                nearestID = entries.get(index - backCount).getLinkID();
+            }
+            else if(backCount == 0) {
+                nearestID = entries.get(index + forwardCount).getLinkID();
+            }
+            else if(forwardCount <= backCount) {
                 nearestID = entries.get(index + forwardCount).getLinkID();
             }
             else {

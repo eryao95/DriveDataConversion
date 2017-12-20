@@ -16,7 +16,7 @@ public class WriteCsvFile {
         try {
             CsvWriter csvOutput = new CsvWriter(new FileWriter(outputFile, true), ',');
 
-            for (int i = 0; i < 14; i++) {
+            for (int i = 0; i < 15; i++) {
                 csvOutput.write(outputData[i]);
                 if (i == 6) {
                     csvOutput.endRecord();
