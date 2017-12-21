@@ -1,7 +1,8 @@
 package com.company;
 
 public class Config {
-    public static final int TIME_FOR_DELAY = 90;
+    public static final int UPPER_LIMIT_FOR_DELAY = 90;
+    public static final int LOWER_LIMIT_FOR_DELAY = 5;
     public static final int SPEED_FOR_DELAY = 5;
     public static final int BUFFER_FOR_LINK_CHANGE = 10;
     public static final String CONGESTION = "-1";

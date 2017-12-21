@@ -38,7 +38,7 @@ public class ReadCsvFile {
     public void checkForTrafficLights(String [] outputData) {
         size = entries.size();
 
-        if(size > TIME_FOR_DELAY) {
+        if(size > UPPER_LIMIT_FOR_DELAY) {
             checkSpeedRequirements(outputData, size);
         }
     }
@@ -52,7 +52,7 @@ public class ReadCsvFile {
         startIndex = 0;
         speed = 0;
         endIndex = 1;
-        while(startIndex + TIME_FOR_DELAY < size) {
+        while(startIndex + UPPER_LIMIT_FOR_DELAY < size) {
             for (int i = startIndex; i < size; i++) {
                 speed = entries.get(i).getSpeed();
                 if (speed > SPEED_FOR_DELAY && i != 0) {
@@ -79,7 +79,7 @@ public class ReadCsvFile {
                 endID = mapLinkID(endIndex);
             }
 
-            if(delay > TIME_FOR_DELAY) {
+            if(delay > UPPER_LIMIT_FOR_DELAY) {
                 outputData[0] = "CONGESTION";
                 outputData[2] = entries.get(startIndex).getLatitude();
                 outputData[3] = entries.get(startIndex).getLongitude();
@@ -102,7 +102,7 @@ public class ReadCsvFile {
                 }
 
             }
-            else if (delay > 5 && delay <= TIME_FOR_DELAY){
+            else if (delay > LOWER_LIMIT_FOR_DELAY && delay <= UPPER_LIMIT_FOR_DELAY){
                 trafficLight = checkForNextNSeconds(endIndex);
 
                 if (startID.equals(endID)) {
