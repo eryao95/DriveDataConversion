@@ -18,7 +18,7 @@ public class Main {
         for(int i = 0; i < listOfFiles.length; i++) {
             File file = listOfFiles[i];
             fileName = file.getName();
-            parts = fileName.split(".txt");
+            parts = fileName.split("_");
             String routeID = parts[0];
 
             outputData[1] = routeID;
@@ -34,7 +34,16 @@ public class Main {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            try {
+                CsvReader roadFileToRead = new CsvReader("link_cat.txt");
+                ReadCsvFile inputFile = new ReadCsvFile();
+                inputFile.createHashMap(roadFileToRead);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
-

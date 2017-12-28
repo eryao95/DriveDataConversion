@@ -1,10 +1,12 @@
 package com.company;
 
 import com.csvreader.CsvReader;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static com.company.Config.*;
 
@@ -12,6 +14,8 @@ public class ReadCsvFile {
     private ArrayList<Entry> entries = new ArrayList<>();
     private int size;
     private String missingID = "-10";
+    HashMap<String, String> roadTypes = new HashMap<String, String>();
+
 
     public ReadCsvFile() {
         size = 0;
@@ -100,7 +104,6 @@ public class ReadCsvFile {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
             else if (delay > LOWER_LIMIT_FOR_DELAY && delay <= UPPER_LIMIT_FOR_DELAY){
                 trafficLight = checkForNextNSeconds(endIndex);
@@ -135,7 +138,6 @@ public class ReadCsvFile {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
 
             if(speed > SPEED_FOR_DELAY) {
@@ -241,5 +243,17 @@ public class ReadCsvFile {
 
         entries.get(index).setLinkID(correctID);
         return correctID;
+    }
+
+    public void createHashMap(CsvReader roadFileToRead) throws IOException {
+        try {
+            while(roadFileToRead.readRecord()) {
+                roadTypes.put(roadFileToRead.get(0), roadFileToRead.get(1));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
