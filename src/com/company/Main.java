@@ -25,20 +25,12 @@ public class Main {
             outputData[8] = routeID;
 
             try{
+                CsvReader roadFileToRead = new CsvReader("link_cat.txt");
                 CsvReader fileToRead = new CsvReader("C:\\Users\\Bo Yang\\Desktop\\DriveDataConversion\\Files\\" + fileName);
                 ReadCsvFile input = new ReadCsvFile();
+                input.createHashMap(roadFileToRead);
                 input.readCsvFile(fileToRead);
                 input.checkForTrafficLights(outputData);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                CsvReader roadFileToRead = new CsvReader("link_cat.txt");
-                ReadCsvFile inputFile = new ReadCsvFile();
-                inputFile.createHashMap(roadFileToRead);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {

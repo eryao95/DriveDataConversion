@@ -1,7 +1,6 @@
 package com.company;
 
 import com.csvreader.CsvReader;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static com.company.Config.*;
+import static java.lang.Math.abs;
 
 public class ReadCsvFile {
     private ArrayList<Entry> entries = new ArrayList<>();
@@ -51,12 +51,14 @@ public class ReadCsvFile {
         int startIndex, endIndex, speed;
         float delay, startTime, endTime;
         String startID, endID;
-        boolean trafficLight;
+        double distance, percentageOfSpeedZero;
+        boolean trafficLight, checkSpeedBeforeAndAfter;
 
         startIndex = 0;
         speed = 0;
         endIndex = 1;
         while(startIndex + UPPER_LIMIT_FOR_DELAY < size) {
+            distance = 0;
             for (int i = startIndex; i < size; i++) {
                 speed = entries.get(i).getSpeed();
                 if (speed > SPEED_FOR_DELAY && i != 0) {
@@ -107,19 +109,34 @@ public class ReadCsvFile {
             }
             else if (delay > LOWER_LIMIT_FOR_DELAY && delay <= UPPER_LIMIT_FOR_DELAY){
                 trafficLight = checkForNextNSeconds(endIndex);
+                percentageOfSpeedZero = calculatePercentage(startIndex, endIndex);
+                checkSpeedBeforeAndAfter = calculateSpeedBeforeAndAfter(startIndex, endIndex);
 
-                if (startID.equals(endID)) {
-                    if(trafficLight) {
-                        outputData[14] = RULE_TWO;
-                    }
-                    else {
-                        outputData[14] = RULE_ONE;
-                    }
+                for(int n = endIndex; n>startIndex; n--) {
+                    distance = distance + entries.get(n).getDistanceTravelled();
+                }
+                if(distance > DISTANCE_LIMIT_DURING_DELAY || percentageOfSpeedZero < LIMIT_FOR_PERCENTAGE_OF_ZEROS || checkSpeedBeforeAndAfter) {
+                    outputData[0] = "CONGESTION";
+                    outputData[14] = CONGESTION;
+                    System.out.println("distance = " + distance);
+                    System.out.println("percentage = " + percentageOfSpeedZero);
+                    System.out.println(checkSpeedBeforeAndAfter);
                 }
                 else {
-                    outputData[14] = RULE_THREE;
+                    outputData[0] = "TRAFFIC LIGHT";
+                    if (startID.equals(endID)) {
+                        if(trafficLight) {
+                            outputData[14] = RULE_TWO;
+                        }
+                        else {
+                            outputData[14] = RULE_ONE;
+                        }
+                    }
+                    else {
+                        outputData[14] = RULE_THREE;
+                    }
                 }
-                outputData[0] = "TRAFFIC LIGHT";
+
                 outputData[2] = entries.get(startIndex).getLatitude();
                 outputData[3] = entries.get(startIndex).getLongitude();
                 outputData[4] = startID;
@@ -148,6 +165,85 @@ public class ReadCsvFile {
             }
         }
     }
+
+    private boolean calculateSpeedBeforeAndAfter(int startIndex, int endIndex) {
+        double averageSpeedBefore, averageSpeedAfter, totalSpeedAfter=0, totalSpeedBefore=0, differenceInSpeed;
+
+        for(int i = endIndex + 1; i < endIndex + TIME_TO_CALCULATE_AVERAGE_SPEED; i++) {
+            totalSpeedAfter = totalSpeedAfter + entries.get(i).getDoubleSpeed();
+        }
+        averageSpeedAfter = totalSpeedAfter / TIME_TO_CALCULATE_AVERAGE_SPEED;
+
+        for(int j = startIndex - 1; j > startIndex - TIME_TO_CALCULATE_AVERAGE_SPEED; j--) {
+            totalSpeedBefore = totalSpeedBefore + entries.get(j).getDoubleSpeed();
+        }
+        averageSpeedBefore = totalSpeedBefore / TIME_TO_CALCULATE_AVERAGE_SPEED;
+
+        differenceInSpeed = averageSpeedBefore - averageSpeedAfter;
+
+        //if speed between s1 and s2 is within 5 km/h, they are considered to be approximately same
+        if(abs(differenceInSpeed) < 5) {
+            if(averageSpeedAfter > LOWER_LIMIT_FOR_SPEED) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        else if(differenceInSpeed < 0) {
+            if(averageSpeedAfter > LOWER_LIMIT_FOR_SPEED && averageSpeedBefore <= LOWER_LIMIT_FOR_SPEED) {
+                return true;
+            }
+            else if(averageSpeedAfter > LOWER_LIMIT_FOR_SPEED && averageSpeedBefore > LOWER_LIMIT_FOR_SPEED) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        else {
+            if(averageSpeedAfter <= LOWER_LIMIT_FOR_SPEED && averageSpeedBefore > LOWER_LIMIT_FOR_SPEED) {
+                return true;
+            }
+            else if(averageSpeedAfter > LOWER_LIMIT_FOR_SPEED && averageSpeedBefore > LOWER_LIMIT_FOR_SPEED) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+    }
+
+    private double calculatePercentage(int startIndex, int endIndex) {
+        int count = 0, totalNum;
+        double percentage;
+
+        totalNum = (endIndex - startIndex) + 1;
+        for(int i = startIndex; i < startIndex + totalNum; i++) {
+            if(entries.get(i).getSpeed() == 0){
+                count++;
+            }
+        }
+        percentage = (count * 100.0) / totalNum;
+
+        return percentage;
+    }
+    /* add in the road types next time
+    private boolean checkForRoadTypes(int startIndex) {
+
+        if(roadTypes.get(entries.get(startIndex).getLinkID()).equals("1")) {
+            return true;
+        }
+        else if(roadTypes.get(entries.get(startIndex).getLinkID()).equals("2")) {
+            return true;
+        }
+        else if(roadTypes.get(entries.get(startIndex).getLinkID()).equals("4")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }*/
 
     //check for next 10s to see if the vehicle changes linkID
     private boolean checkForNextNSeconds(int endIndex) {

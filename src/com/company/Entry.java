@@ -67,6 +67,16 @@ public class Entry {
         return Integer.parseInt(speed);
     }
 
+    public double getDoubleSpeed() {
+        return Double.parseDouble(speed);
+    }
+
+    public double getDistanceTravelled() {
+       double distance = (Integer.parseInt(speed) * 1000) / 3600.0;
+
+       return distance;
+    }
+
     public String getDate() {
         return date;
     }
