@@ -99,6 +99,9 @@ public class ReadCsvFile {
                 outputData[12] = entries.get(endIndex).getTime();
                 outputData[13] = String.valueOf(delay);
                 outputData[14] = CONGESTION;
+                outputData[15] = "FALSE";
+                outputData[16] = "FALSE";
+                outputData[17] = "FALSE";
 
                 try {
                     WriteCsvFile output = new WriteCsvFile();
@@ -118,9 +121,24 @@ public class ReadCsvFile {
                 if(distance > DISTANCE_LIMIT_DURING_DELAY || percentageOfSpeedZero < LIMIT_FOR_PERCENTAGE_OF_ZEROS || checkSpeedBeforeAndAfter) {
                     outputData[0] = "CONGESTION";
                     outputData[14] = CONGESTION;
-                    System.out.println("distance = " + distance);
-                    System.out.println("percentage = " + percentageOfSpeedZero);
-                    System.out.println(checkSpeedBeforeAndAfter);
+                    if(percentageOfSpeedZero < LIMIT_FOR_PERCENTAGE_OF_ZEROS) {
+                        outputData[15] = "TRUE";
+                    }
+                    else {
+                        outputData[15] = "FALSE";
+                    }
+                    if(distance > DISTANCE_LIMIT_DURING_DELAY) {
+                        outputData[16] = "TRUE";
+                    }
+                    else {
+                        outputData[16] = "FALSE";
+                    }
+                    if(checkSpeedBeforeAndAfter) {
+                        outputData[17] = "TRUE";
+                    }
+                    else {
+                        outputData[17] = "FALSE";
+                    }
                 }
                 else {
                     outputData[0] = "TRAFFIC LIGHT";
@@ -135,6 +153,9 @@ public class ReadCsvFile {
                     else {
                         outputData[14] = RULE_THREE;
                     }
+                    outputData[15] = "FALSE";
+                    outputData[16] = "FALSE";
+                    outputData[17] = "FALSE";
                 }
 
                 outputData[2] = entries.get(startIndex).getLatitude();

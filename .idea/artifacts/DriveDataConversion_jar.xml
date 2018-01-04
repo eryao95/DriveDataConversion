@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="DriveDataConversion:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DriveDataConversion_jar</output-path>
+    <root id="archive" name="DriveDataConversion.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/jar/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="DriveDataConversion" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javacsv2.1/javacsv.jar" path-in-jar="/" />
+      <element id="library" level="project" name="javacsv2" />
+      <element id="dir-copy" path="$PROJECT_DIR$" />
+    </root>
+  </artifact>
+</component>

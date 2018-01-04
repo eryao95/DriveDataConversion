@@ -7,7 +7,7 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) {
-        String outputData[] = new String[15];
+        String outputData[] = new String[18];
         String parts[] = new String[3];
         String fileName;
 
