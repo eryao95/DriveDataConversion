@@ -14,7 +14,6 @@ public class Main {
         File folder = new File("Files");
         File [] listOfFiles = folder.listFiles();
 
-
         for(int i = 0; i < listOfFiles.length; i++) {
             File file = listOfFiles[i];
             fileName = file.getName();
